@@ -1,12 +1,10 @@
-#include <cmath>
-#include <algorithm>
 #include <eigen3/Eigen/Core>
 #include <eigen3/Eigen/Dense>
 #include <iostream>
-#include <ParametrciSpline/include/ParametricSpline.hpp>
+#include "ParametricSpline.hpp"
 
-void getInputData(Eigen::MatrixXd &InputData) 
-// Convert a string type input to a Eigen Matrix as 
+void getInputData(Eigen::MatrixXd &InputData)
+// Convert a string type input to a Eigen Matrix as
 // [    x1  x2  x3  x4  x5
 //      y1  y2  y3  y4  y5
 //      z1  z2  z3  z4  z5]
@@ -85,6 +83,20 @@ int main()
               << InputData << std::endl;
 
     ParametricSpline paraline(InputData);
+
+    paraline.setConstants(.02);
+    // std::cout << "Good: \n";
+
+    Eigen::Vector3d StartSlope = {1.0, 1.0, 1.0}, EndSlope = {1.0, 1.0, 1.0};
+
+    paraline.setBoundary(StartSlope, EndSlope);
+
+    // std::cout << "So far so good!\n";
+    // paraline.getCoefficients();
+    // auto line = paraline.C0_l;
+    // std::cout << paraline.ContinuityCoeff.row(line) << std::endl;
+    paraline.calcCoefficients();
+    paraline.saveData();
 
     return 0;
 }
