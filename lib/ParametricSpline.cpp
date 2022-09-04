@@ -1,4 +1,5 @@
 #include <fstream>
+#include <iomanip>
 #include "ParametricSpline.hpp"
 
 ParametricSpline::ParametricSpline(Eigen::MatrixXd &InputMatrix) : INTERVAL(0.01),
@@ -9,10 +10,9 @@ ParametricSpline::ParametricSpline(Eigen::MatrixXd &InputMatrix) : INTERVAL(0.01
     num_points = InputData.rows();
     num_curves = num_points - 1;
 
+    getContinuityCoeff();
     // std::string OutputString = "Testing";
     // printData(InputData, OutputString);
-
-    getContinuityCoeff();
 };
 
 ParametricSpline::~ParametricSpline(){};
@@ -67,43 +67,38 @@ void ParametricSpline::calcCoefficients()
             Constraints.block<2, 3>(4 * i + 3, 0) = Eigen::MatrixXd::Zero(2, 3);
         }
     }
-    
+
     // std::cout << "So far so good!\n";
     // Set all the CtrlCondition Matrix
     CtrlCondition.resize(4 * num_curves, 4 * num_curves);
 
-    CtrlCondition.block<5, 4>(0, 0) << \
-        ContinuityCoeff.row(C0_l),
+    CtrlCondition.block<5, 4>(0, 0) << ContinuityCoeff.row(C0_l),
         ContinuityCoeff.row(C1_l),
         ContinuityCoeff.row(C0_r),
         ContinuityCoeff.row(C1_r),
         ContinuityCoeff.row(C2_r);
 
-    CtrlCondition.block<5, 4>(CtrlCondition.rows() - 5, CtrlCondition.cols() - 4) << \
-        - ContinuityCoeff.row(C1_l),
-        - ContinuityCoeff.row(C2_l),
+    CtrlCondition.block<5, 4>(CtrlCondition.rows() - 5, CtrlCondition.cols() - 4) << -ContinuityCoeff.row(C1_l),
+        -ContinuityCoeff.row(C2_l),
         ContinuityCoeff.row(C0_l),
         ContinuityCoeff.row(C0_r),
         ContinuityCoeff.row(C1_r);
 
-    for( int i = 1 ; i < num_curves - 1 ; i++ )
+    for (int i = 1; i < num_curves - 1; i++)
     {
-        CtrlCondition.block<6,4>(4*i-1,4*i) << \
-            - ContinuityCoeff.row(C1_l),
-            - ContinuityCoeff.row(C2_l),
+        CtrlCondition.block<6, 4>(4 * i - 1, 4 * i) << -ContinuityCoeff.row(C1_l),
+            -ContinuityCoeff.row(C2_l),
             ContinuityCoeff.row(C0_l),
             ContinuityCoeff.row(C0_r),
             ContinuityCoeff.row(C1_r),
             ContinuityCoeff.row(C2_r);
-
     }
 
     Result = CtrlCondition.completeOrthogonalDecomposition().pseudoInverse() * Constraints;
-    // printData(Constraints, "Constraints: ");
-    // printData(CtrlCondition, "Control Condition Matrix: ");
+    printData(Constraints, "Constraints: ");
+    printData(CtrlCondition, "Control Condition Matrix: ");
 
     printData(Result, "Result: ");
-
 };
 
 void ParametricSpline::printData(Eigen::MatrixXd &InputMatrix, std::string OutputString)
@@ -140,14 +135,53 @@ void ParametricSpline::setBoundary(Eigen::Vector3d &StartSlope, Eigen::Vector3d 
 
         BoundaryCondition.row(i + k) = InputData.row(i);
     }
-
 };
 
-void ParametricSpline::saveData(){
+void ParametricSpline::saveData()
+{
     std::ofstream outfile;
     outfile.open("/home/jeremy/ParaSpline/data/CoefficientResult.txt");
 
-    outfile << Result << std::endl;
+    int Width = 15;
+    outfile << std::setfill(' ')
+            << std::setw(Width)
+            << "X"
+            << std::setw(Width)
+            << "Y"
+            << std::setw(Width)
+            << "Z"
+            << std::endl;
+
+    for (int i = 0; i < 4; i++)
+    {
+        switch (i)
+        {
+        case 0:
+            outfile << "a:" << std::endl;
+            break;
+        case 1:
+            outfile << "b:" << std::endl;
+            break;
+        case 2:
+            outfile << "c:" << std::endl;
+            break;
+        case 3:
+            outfile << "d:" << std::endl;
+            break;
+        }
+        for (int j = 0; j < Result.rows() / 4; j++)
+        {
+            outfile << std::setfill(' ')
+                    << std::setw(Width)
+                    << Result(i + 4 * j, 0) << ","
+                    << std::setw(Width)
+                    << Result(i + 4 * j, 1)
+                    << std::setw(Width)
+                    << Result(i + 4 * j, 2)
+                    << ";"
+                    << std::endl;
+        }
+    }
 
     outfile.close();
 }

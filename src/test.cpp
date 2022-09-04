@@ -3,7 +3,7 @@
 #include <iostream>
 #include "ParametricSpline.hpp"
 
-void getInputData(Eigen::MatrixXd &InputData)
+void getInputData(Eigen::MatrixXd &InputData, Eigen::Vector3d& StartSlope, Eigen::Vector3d& EndSlope)
 // Convert a string type input to a Eigen Matrix as
 // [    x1  x2  x3  x4  x5
 //      y1  y2  y3  y4  y5
@@ -12,6 +12,10 @@ void getInputData(Eigen::MatrixXd &InputData)
     // InputData is a Vector for storing point xyz coodinates
     std::string InputString; // Input data can be instream or through TCP/UDP
     InputString = "10.5 12.0 15.0 1.0 0.5 ;0.5 0.5 0.5 0.5 0.5 ;1.5 10 5.5 6.0 0.5 ";
+    StartSlope = {1.0, 1.0, 1.0};
+    EndSlope = {1.0, 1.0, 1.0};
+
+
     int NumMarkers = 0; // calculate the total number of the markers, just for resizing the Eigen Vector
     for (int i = 0; i < InputString.length(); i++)
     {
@@ -76,7 +80,8 @@ int main()
 
     std::cout << "Receiving Optical Marker Position INPUTS..." << std::endl;
     Eigen::MatrixXd InputData;
-    getInputData(InputData);
+    Eigen::Vector3d StartSlope, EndSlope;
+    getInputData(InputData, StartSlope, EndSlope);
     std::cout << "Point Matrix has been successfully created" << std::endl;
     // Calculate the coefficients of the cubic formula
     std::cout << "Points: \n"
@@ -85,16 +90,7 @@ int main()
     ParametricSpline paraline(InputData);
 
     paraline.setConstants(.02);
-    // std::cout << "Good: \n";
-
-    Eigen::Vector3d StartSlope = {1.0, 1.0, 1.0}, EndSlope = {1.0, 1.0, 1.0};
-
     paraline.setBoundary(StartSlope, EndSlope);
-
-    // std::cout << "So far so good!\n";
-    // paraline.getCoefficients();
-    // auto line = paraline.C0_l;
-    // std::cout << paraline.ContinuityCoeff.row(line) << std::endl;
     paraline.calcCoefficients();
     paraline.saveData();
 
