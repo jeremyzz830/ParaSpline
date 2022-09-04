@@ -1,0 +1,26 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+../lib/ParametricSpline.hpp
+cmath
+-
+iostream
+-
+eigen3/Eigen/Dense
+-
+
+/home/jeremy/ParaSpline/src/test.cpp
+eigen3/Eigen/Core
+-
+eigen3/Eigen/Dense
+-
+iostream
+-
+ParametricSpline.hpp
+/home/jeremy/ParaSpline/src/ParametricSpline.hpp
+

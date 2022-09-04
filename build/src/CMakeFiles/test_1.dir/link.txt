@@ -1,0 +1,1 @@
+/usr/bin/c++     CMakeFiles/test_1.dir/test.cpp.o  -o ../bin/test_1 ../lib/libheader.a 
